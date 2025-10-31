@@ -6,31 +6,37 @@ public class CameraManager : MonoBehaviour
     private Transform target;
 
     [SerializeField]
-    private Vector3 offset = new Vector3(0f, 5f, -10f);
+    private bool captureSceneOffset = true;
+
+    [SerializeField]
+    private Vector3 localOffset = new Vector3(0f, 0f, 3f);
+
+    [SerializeField]
+    private Vector3 upDirection = Vector3.up;
+
+    private bool offsetCaptured;
 
     void Awake()
     {
-        if (target != null)
+        if (target == null)
         {
-            if (offset == Vector3.zero)
+            GameObject found = GameObject.Find("Plane.011");
+            if (found != null)
             {
-                offset = transform.position - target.position;
-            }
-            return;
-        }
+                target = found.transform;
 
-        GameObject found = GameObject.Find("Plane.011");
-        if (found != null)
-        {
-            target = found.transform;
-            if (offset == Vector3.zero)
-            {
-                offset = transform.position - target.position;
+                //here we are going to calculate the desired position of the camera.
+                //we want to get the target object, and offset right down it's z axis. by a given distance to get the 
+                //desired position.
+                Vector3 desiredPosition = target.position + target.forward * localOffset.z;
+                transform.position = desiredPosition;
+                transform.LookAt(target);
             }
-        }
-        else
-        {
-            Debug.LogWarning("Camera could not find a GameObject named 'Plane.002'.");
+            else
+            {
+                Debug.LogWarning("Camera could not find a GameObject named 'Plane.011'.");
+                return;
+            }
         }
 
         Debug.Log("Awake: Camera target: " + target.name);
@@ -43,8 +49,8 @@ public class CameraManager : MonoBehaviour
             return;
         }
 
-        transform.position = target.position + offset;
-        transform.LookAt(target);
+        
         Debug.Log("Late Update Camera position: " + transform.position);
     }
+
 }
